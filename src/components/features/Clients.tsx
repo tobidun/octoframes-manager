@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { Client, Project } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
-import {
-  FiSearch,
-  FiPlus,
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiMoreVertical,
-  FiEdit2,
-  FiTrash2,
-  FiBriefcase,
-  FiUser,
-} from "react-icons/fi";
+import { 
+  FaMagnifyingGlass, 
+  FaPlus, 
+  FaEnvelope, 
+  FaPhone, 
+  FaLocationDot, 
+  FaEllipsisVertical, 
+  FaPenToSquare, 
+  FaTrashCan, 
+  FaBriefcase, 
+  FaUser 
+} from "react-icons/fa6";
 
 interface ClientsProps {
   clients: Client[];
@@ -44,7 +44,7 @@ export function Clients({
       {/* Search and Add Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative w-full sm:max-w-md group">
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#52525b] group-focus-within:text-[#a78bfa] transition-colors" />
+          <FaMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 text-[#52525b] group-focus-within:text-[#a78bfa] transition-colors" />
           <input
             className="bg-[#111116] border border-[#1e1e24] rounded-2xl pl-11 pr-4 py-3 text-sm w-full outline-none focus:border-[#a78bfa]/50 focus:ring-4 focus:ring-[#a78bfa]/5 transition-all"
             placeholder="Search clients by name, email or company..."
@@ -56,7 +56,7 @@ export function Clients({
           className="bg-[#a78bfa] hover:bg-[#9061f9] text-white px-6 py-3 rounded-2xl font-black text-sm transition-all w-full sm:w-auto shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 group hover:-translate-y-0.5 active:translate-y-0"
           onClick={onAdd}
         >
-          <FiPlus className="text-lg group-hover:rotate-90 transition-transform duration-300" />
+          <FaPlus className="text-lg group-hover:rotate-90 transition-transform duration-300" />
           <span>New Client</span>
         </button>
       </div>
@@ -64,7 +64,7 @@ export function Clients({
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center bg-[#111116] border border-dashed border-[#1e1e24] rounded-3xl">
           <div className="w-16 h-16 bg-[#16161a] rounded-full flex items-center justify-center mb-4 text-[#27272a]">
-            <FiUser size={32} />
+            <FaUser size={32} />
           </div>
           <h3 className="text-lg font-bold text-white mb-2">
             No clients found
@@ -123,15 +123,15 @@ export function Clients({
 
                 {/* Contact Info */}
                 <div className="space-y-3 mb-6">
-                  <ContactItem icon={<FiMail />} text={client.email} />
-                  <ContactItem icon={<FiPhone />} text={client.phone} />
-                  <ContactItem icon={<FiMapPin />} text={client.location} />
+                  <ContactItem icon={<FaEnvelope />} text={client.email} />
+                  <ContactItem icon={<FaPhone />} text={client.phone} />
+                  <ContactItem icon={<FaLocationDot />} text={client.location} />
                 </div>
 
                 {/* Project Stats */}
                 <div className="flex items-center gap-2 p-3 bg-[#16161a] border border-[#1e1e24] rounded-2xl mb-6">
                   <div className="w-8 h-8 rounded-lg bg-[#a78bfa]/10 flex items-center justify-center text-[#a78bfa]">
-                    <FiBriefcase size={14} />
+                    <FaBriefcase size={14} />
                   </div>
                   <div className="flex-1">
                     <div className="text-[9px] font-black text-[#52525b] uppercase tracking-widest">
@@ -158,7 +158,7 @@ export function Clients({
                     className="flex-1 bg-[#16161a] hover:bg-[#1e1e24] border border-[#1e1e24] text-[#a1a1aa] hover:text-white text-[10px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all flex items-center justify-center gap-2"
                     onClick={() => onEdit(client)}
                   >
-                    <FiEdit2 size={12} />
+                    <FaPenToSquare size={12} />
                     Edit
                   </button>
                   <button
@@ -172,7 +172,7 @@ export function Clients({
                         onDel(client.id);
                     }}
                   >
-                    <FiTrash2 size={12} />
+                    <FaTrashCan size={12} />
                     Delete
                   </button>
                 </div>

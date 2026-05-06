@@ -1,20 +1,24 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
 import { Client, Project, Task, Invoice } from "@/lib/types";
 import { PROJECT_STATUS, STATUS_COLORS } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
 import { fmtMoney } from "@/lib/utils";
+import { Modal } from "@/components/ui/Modal";
 import { 
-  FiUsers, 
-  FiBriefcase, 
-  FiCheckCircle, 
-  FiAlertCircle, 
-  FiDollarSign, 
-  FiTrendingUp, 
-  FiPieChart,
-  FiClock,
-  FiArrowRight
-} from "react-icons/fi";
+  FaUsers, 
+  FaBriefcase, 
+  FaCircleCheck, 
+  FaCircleExclamation, 
+  FaDollarSign, 
+  FaArrowTrendUp, 
+  FaChartPie,
+  FaClock,
+  FaArrowRight,
+  FaTrashCan
+} from "react-icons/fa6";
 
 interface DashboardProps {
   clients: Client[];
@@ -22,13 +26,24 @@ interface DashboardProps {
   tasks: Task[];
   invoices: Invoice[];
   cName: (id: string) => string;
+  pName: (id: string) => string;
   onLoadDemo?: () => void;
+  onMarkAllDone?: () => void;
 }
 
-export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDemo }: DashboardProps) {
+export function Dashboard({ clients, projects, tasks, invoices, cName, pName, onLoadDemo, onMarkAllDone }: DashboardProps) {
+  const [showDoneModal, setShowDoneModal] = useState(false);
   const active = projects.filter(p => !["Archived", "Delivered"].includes(p.status));
   const pending = tasks.filter(t => t.status !== "Done");
-  const urgent = tasks.filter(t => t.priority === "Urgent" && t.status !== "Done");
+  
+  // Filtering for "Today's Agenda"
+  const today = new Date().toISOString().split('T')[0];
+  const todaysAgenda = tasks.filter(t => t.status !== "Done"); // Showing all pending as "Agenda"
+  // If we want specifically today's due date:
+  // const todaysAgenda = tasks.filter(t => t.status !== "Done" && (t.dueDate === today || !t.dueDate));
+  
+  // For the urgent stat card, we still want to show urgent count
+  const urgentCount = tasks.filter(t => t.priority === "Urgent" && t.status !== "Done").length;
   
   const invTotal = (inv: Invoice) => {
     const sub = inv.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0), 0);
@@ -65,7 +80,7 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDem
             </button>
           )}
           <div className="flex items-center gap-2 px-4 py-2 bg-[#16161a] border border-[#1e1e24] rounded-xl text-xs font-bold text-[#a1a1aa]">
-            <FiClock className="text-[#a78bfa]" />
+            <FaClock className="text-[#a78bfa]" />
             <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
           </div>
         </div>
@@ -76,31 +91,31 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDem
         <StatCard 
           label="Total Clients" 
           value={clients.length} 
-          icon={<FiUsers />} 
+          icon={<FaUsers />} 
           color="#a78bfa" 
           trend="+2 this month"
         />
         <StatCard 
           label="Active Projects" 
           value={active.length} 
-          icon={<FiBriefcase />} 
+          icon={<FaBriefcase />} 
           color="#60a5fa" 
           trend={`${active.length} in progress`}
         />
         <StatCard 
           label="Task Completion" 
           value={`${completionRate}%`} 
-          icon={<FiCheckCircle />} 
+          icon={<FaCircleCheck />} 
           color="#34d399" 
           trend={`${tasks.filter(t => t.status === "Done").length} tasks finished`}
         />
         <StatCard 
           label="Urgent Alerts" 
-          value={urgent.length} 
-          icon={<FiAlertCircle />} 
+          value={urgentCount} 
+          icon={<FaCircleExclamation />} 
           color="#ef4444" 
           trend="Action required"
-          isAlert={urgent.length > 0}
+          isAlert={urgentCount > 0}
         />
       </div>
 
@@ -112,7 +127,7 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDem
           <div className="flex items-center justify-between mb-8 relative z-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#34d399]/10 flex items-center justify-center text-[#34d399]">
-                <FiTrendingUp size={20} />
+                <FaArrowTrendUp size={20} />
               </div>
               <h3 className="text-lg font-black text-white">Revenue Overview</h3>
             </div>
@@ -143,7 +158,7 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDem
               <div className="text-[10px] text-[#71717a] font-bold uppercase tracking-widest mb-2">Overdue</div>
               <div className="text-3xl font-black text-[#ef4444] tracking-tight">{overdueCount}</div>
               <div className="text-[10px] text-[#ef4444] font-bold mt-2 flex items-center gap-1">
-                <FiAlertCircle /> Needs attention
+                <FaCircleExclamation /> Needs attention
               </div>
             </div>
           </div>
@@ -152,7 +167,7 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDem
         <div className="bg-[#111116] border border-[#1e1e24] rounded-3xl p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-xl bg-[#60a5fa]/10 flex items-center justify-center text-[#60a5fa]">
-              <FiPieChart size={20} />
+              <FaChartPie size={20} />
             </div>
             <h3 className="text-lg font-black text-white">Pipeline</h3>
           </div>
@@ -190,15 +205,15 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDem
         <section>
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-[0.2em]">Recent Activity</h3>
-            <button className="text-[10px] font-bold text-[#a78bfa] hover:underline flex items-center gap-1">
-              View all <FiArrowRight />
-            </button>
+            <Link href="/projects" className="text-[10px] font-bold text-[#a78bfa] hover:underline flex items-center gap-1">
+              View all <FaArrowRight />
+            </Link>
           </div>
           <div className="space-y-4">
             {recentProjects.length === 0 ? (
               <div className="bg-[#111116] border border-dashed border-[#1e1e24] rounded-2xl p-12 text-center">
                 <div className="w-12 h-12 bg-[#16161a] rounded-full flex items-center justify-center mx-auto mb-4 text-[#27272a]">
-                  <FiBriefcase size={24} />
+                  <FaBriefcase size={24} />
                 </div>
                 <p className="text-sm text-[#52525b] font-medium">No projects found. Start by adding one!</p>
               </div>
@@ -233,39 +248,85 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, onLoadDem
           </div>
         </section>
 
-        {/* Urgent Tasks */}
+        {/* Daily Agenda */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-[0.2em]">Priority Tasks</h3>
-            <div className="text-[10px] font-black text-[#ef4444] animate-pulse">
-              {urgent.length > 0 ? `${urgent.length} URGENT` : "ALL CLEAR"}
-            </div>
+            <h3 className="text-xs font-bold text-[#71717a] uppercase tracking-[0.2em]">Daily Agenda</h3>
+            <button 
+              onClick={() => todaysAgenda.length > 0 && setShowDoneModal(true)}
+              className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all border ${
+                todaysAgenda.length > 0 
+                  ? "bg-[#34d399]/10 text-[#34d399] border-[#34d399]/20 hover:bg-[#34d399]/20" 
+                  : "bg-[#16161a] text-[#52525b] border-[#1e1e24] cursor-default"
+              }`}
+            >
+              Mark all as completed
+            </button>
           </div>
+
+          {showDoneModal && (
+            <Modal title="Complete Agenda" onClose={() => setShowDoneModal(false)}>
+              <div className="text-center space-y-6 py-4">
+                <div className="w-16 h-16 bg-[#34d399]/10 rounded-full flex items-center justify-center mx-auto text-[#34d399]">
+                  <FaCircleCheck size={32} />
+                </div>
+                <div className="space-y-2">
+                  <h4 className="text-xl font-black text-white">Finish Daily Agenda?</h4>
+                  <p className="text-sm text-[#71717a]">
+                    You are about to mark <span className="text-white font-bold">{todaysAgenda.length} tasks</span> as completed. 
+                    This will update your studio progress.
+                  </p>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button 
+                    className="flex-1 px-6 py-4 bg-[#16161a] border border-[#1e1e24] rounded-2xl text-xs font-black uppercase tracking-widest text-[#71717a] hover:text-white transition-all"
+                    onClick={() => setShowDoneModal(false)}
+                  >
+                    Not Yet
+                  </button>
+                  <button 
+                    className="flex-1 px-6 py-4 bg-[#34d399] text-[#0c0c0f] rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-green-500/20 hover:bg-[#10b981] transition-all"
+                    onClick={() => {
+                      onMarkAllDone?.();
+                      setShowDoneModal(false);
+                    }}
+                  >
+                    Confirm All Done
+                  </button>
+                </div>
+              </div>
+            </Modal>
+          )}
+          
           <div className="space-y-4">
-            {urgent.length === 0 ? (
+            {todaysAgenda.length === 0 ? (
               <div className="bg-[#111116] border border-dashed border-[#1e1e24] rounded-2xl p-12 text-center">
                 <div className="w-12 h-12 bg-[#16161a] rounded-full flex items-center justify-center mx-auto mb-4 text-[#34d399]">
-                  <FiCheckCircle size={24} />
+                  <FaCircleCheck size={24} />
                 </div>
-                <p className="text-sm text-[#52525b] font-medium">All priority tasks completed.</p>
+                <p className="text-sm text-[#52525b] font-medium">Your agenda is clear for today.</p>
               </div>
             ) : (
-              urgent.slice(0, 5).map(t => (
-                <div key={t.id} className="bg-[#111116] border-l-[4px] border-l-[#ef4444] border border-[#1e1e24] rounded-2xl p-5 hover:bg-[#16161a] transition-colors">
+              todaysAgenda.slice(0, 5).map(t => (
+                <div key={t.id} className={`bg-[#111116] border-l-[4px] border border-[#1e1e24] rounded-2xl p-5 hover:bg-[#16161a] transition-colors ${t.priority === 'Urgent' ? 'border-l-[#ef4444]' : 'border-l-[#a78bfa]'}`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-sm font-bold text-white">{t.title}</div>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#ef4444]/10 border border-[#ef4444]/20 rounded-full text-[9px] font-black text-[#ef4444] uppercase">
-                      Urgent
+                    <div className={`px-2 py-0.5 border rounded-full text-[9px] font-black uppercase ${
+                      t.priority === 'Urgent' 
+                        ? 'bg-[#ef4444]/10 border-[#ef4444]/20 text-[#ef4444]' 
+                        : 'bg-[#a78bfa]/10 border-[#a78bfa]/20 text-[#a78bfa]'
+                    }`}>
+                      {t.priority}
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-[10px] font-bold text-[#71717a]">
                     <div className="flex items-center gap-1">
-                      <FiClock size={12} />
+                      <FaClock size={12} />
                       Due {t.dueDate || "Asap"}
                     </div>
                     <div className="flex items-center gap-1">
-                      <FiBriefcase size={12} />
-                      Project ID: {t.projectId.slice(0, 8)}
+                      <FaBriefcase size={12} />
+                      {pName(t.projectId)}
                     </div>
                   </div>
                 </div>
@@ -290,13 +351,14 @@ function StatCard({ label, value, icon, color, trend, isAlert }: {
     <div className={`
       relative group bg-[#111116] rounded-3xl p-6 border border-[#1e1e24] transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-[${color}]/10
       ${isAlert ? 'border-[#ef4444]/30' : ''}
+      flex flex-col items-center text-center sm:items-start sm:text-left
     `}>
       <div 
         className="absolute top-0 right-0 w-24 h-24 blur-3xl opacity-10 group-hover:opacity-20 transition-opacity rounded-full -mr-8 -mt-8" 
         style={{ backgroundColor: color }} 
       />
       
-      <div className="flex items-start justify-between mb-4 relative z-10">
+      <div className="flex items-center justify-center mb-4 relative z-10 sm:justify-start w-full">
         <div 
           className="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-lg transition-transform group-hover:scale-110 duration-500" 
           style={{ backgroundColor: `${color}15`, color: color }}
@@ -305,12 +367,12 @@ function StatCard({ label, value, icon, color, trend, isAlert }: {
         </div>
       </div>
       
-      <div className="relative z-10">
+      <div className="relative z-10 w-full">
         <div className="text-3xl font-black text-white mb-1 tracking-tight">{value}</div>
         <div className="text-[10px] text-[#71717a] uppercase font-black tracking-widest">{label}</div>
         
         {trend && (
-          <div className="mt-4 pt-4 border-t border-[#1e1e24] flex items-center gap-2">
+          <div className="mt-4 pt-4 border-t border-[#1e1e24] flex items-center justify-center sm:justify-start gap-2">
             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
             <span className="text-[9px] font-black uppercase tracking-wider text-[#52525b] group-hover:text-[#a1a1aa] transition-colors">{trend}</span>
           </div>

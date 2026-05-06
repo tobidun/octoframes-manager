@@ -1,48 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import { useStorage } from "@/hooks/useStorage";
+import { useStudioApi } from "@/hooks/useStudioApi";
 import { Task, Project } from "@/lib/types";
 import { Tasks } from "@/components/features/Tasks";
 import { Modal } from "@/components/ui/Modal";
+import { TasksSkeleton } from "@/components/ui/Skeleton";
 import { TaskForm } from "@/components/features/Forms";
-import { uid, today } from "@/lib/utils";
-import { DUMMY_PROJECTS, DUMMY_TASKS } from "@/lib/dummyData";
 
 export default function TasksPage() {
-  const [tasks, setTasks, loading] = useStorage<Task[]>("octo-tasks", DUMMY_TASKS);
-  const [projects] = useStorage<Project[]>("octo-projects", DUMMY_PROJECTS);
+  const { data: tasks, save: apiSave, remove: apiRemove, loading: tasksLoading } = useStudioApi<Task>("tasks");
+  const { data: projects, loading: projectsLoading } = useStudioApi<Project>("projects");
   
   const [modal, setModal] = useState(false);
   const [editItem, setEditItem] = useState<Task | null>(null);
   const [viewMode, setViewMode] = useState<"List" | "Kanban">("List");
   const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const flash = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleSave = (item: any) => {
-    if (item.id) {
-      setTasks(tasks.map(i => i.id === item.id ? item : i));
-      flash("Task updated");
-    } else {
-      setTasks([...tasks, { ...item, id: uid(), created: today() }]);
-      flash("Task created");
+  const handleSave = async (item: any) => {
+    setSaving(true);
+    const success = await apiSave(item);
+    setSaving(false);
+    if (success) {
+      flash(item.id ? "Task updated" : "Task created");
+      setModal(false);
+      setEditItem(null);
     }
-    setModal(false);
-    setEditItem(null);
   };
 
-  const handleDel = (id: string) => {
-    setTasks(tasks.filter(i => i.id !== id));
-    flash("Task removed");
+  const handleDel = async (id: string) => {
+    const success = await apiRemove(id);
+    if (success) {
+      flash("Task removed");
+    }
   };
 
   const pName = (id: string) => projects.find(p => p.id === id)?.name || "—";
 
-  if (loading) return <div className="py-20 text-center animate-pulse font-black text-[#52525b] uppercase tracking-widest text-xs">Syncing Tasks...</div>;
+  if (tasksLoading || projectsLoading) return <TasksSkeleton />;
 
   return (
     <div className="space-y-8">
@@ -60,13 +61,19 @@ export default function TasksPage() {
         onAdd={() => { setEditItem(null); setModal(true); }}
         onEdit={(t) => { setEditItem(t); setModal(true); }}
         onDel={handleDel}
-        onToggle={(t) => handleSave({ ...t, status: t.status === "Done" ? "To Do" : "Done" })}
-        onMove={(t, s) => handleSave({ ...t, status: s })}
+        onToggle={(t) => {
+          flash("Updating task...");
+          handleSave({ ...t, status: t.status === "Done" ? "To Do" : "Done" });
+        }}
+        onMove={(t, s) => {
+          flash("Moving task...");
+          handleSave({ ...t, status: s });
+        }}
       />
 
       {modal && (
         <Modal title={editItem ? "Edit Task" : "Add New Task"} onClose={() => setModal(false)}>
-          <TaskForm initial={editItem} projects={projects} onSave={handleSave} />
+          <TaskForm initial={editItem} projects={projects} onSave={handleSave} loading={saving} />
         </Modal>
       )}
 

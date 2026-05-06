@@ -14,10 +14,10 @@ export class Project {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   name!: string;
 
-  @Column()
+  @Column({ type: "uuid" })
   clientId!: string;
 
   @ManyToOne("Client", "projects")
@@ -30,22 +30,22 @@ export class Project {
   })
   status!: ProjectStatus;
 
-  @Column()
+  @Column({ type: "varchar" })
   serviceType!: string;
 
   @Column({ type: "decimal", precision: 10, scale: 2 })
   budget!: number;
 
-  @Column()
+  @Column({ type: "varchar" })
   currency!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   deadline?: string;
 
   @Column({ type: "text", nullable: true })
   description?: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   created!: string;
 
   @CreateDateColumn()

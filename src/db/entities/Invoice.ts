@@ -14,28 +14,28 @@ export class Invoice {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   invoiceNumber!: string;
 
-  @Column()
+  @Column({ type: "uuid" })
   clientId!: string;
 
   @ManyToOne("Client", "invoices")
   client!: Relation<unknown>;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   customClient?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "uuid", nullable: true })
   projectId?: string;
 
   @ManyToOne("Project", "invoices", { nullable: true })
   project?: Relation<unknown>;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   customProject?: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   currency!: string;
 
   @Column({
@@ -45,10 +45,10 @@ export class Invoice {
   })
   status!: InvoiceStatus;
 
-  @Column()
+  @Column({ type: "varchar" })
   issueDate!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   dueDate?: string;
 
   @Column({ type: "decimal", precision: 5, scale: 2, default: 0 })
@@ -60,7 +60,7 @@ export class Invoice {
   @OneToMany("InvoiceItem", "invoice", { cascade: true })
   items!: Relation<unknown[]>;
 
-  @Column()
+  @Column({ type: "varchar" })
   created!: string;
 
   @CreateDateColumn()

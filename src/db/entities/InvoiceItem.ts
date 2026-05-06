@@ -5,7 +5,7 @@ export class InvoiceItem {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   description!: string;
 
   @Column({ type: "decimal", precision: 10, scale: 2 })
@@ -14,7 +14,7 @@ export class InvoiceItem {
   @Column({ type: "decimal", precision: 10, scale: 2 })
   rate!: number;
 
-  @Column()
+  @Column({ type: "uuid" })
   invoiceId!: string;
 
   @ManyToOne("Invoice", "items", { onDelete: "CASCADE" })

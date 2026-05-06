@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Task, Project } from "@/lib/types";
 import { TASK_STATUS, STATUS_COLORS, PRIORITIES } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
+import { FaList, FaTableCellsLarge, FaPlus, FaCheck, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
 import { Kanban } from "@/components/ui/Kanban";
 
 interface TasksProps {
@@ -57,23 +58,26 @@ export function Tasks({
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="flex bg-[#111116] p-1 rounded-xl border border-[#27272a] flex-1">
             <button 
-              className={`flex-1 px-4 py-2 rounded-lg text-[11px] font-bold transition-all ${viewMode === "List" ? "bg-[#27272a] text-white" : "text-[#71717a]"}`}
+              className={`flex-1 px-4 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-2 ${viewMode === "List" ? "bg-[#27272a] text-white" : "text-[#71717a]"}`}
               onClick={() => setViewMode("List")}
             >
-              ☰ List
+              <FaList size={12} />
+              List
             </button>
             <button 
-              className={`flex-1 px-4 py-2 rounded-lg text-[11px] font-bold transition-all ${viewMode === "Kanban" ? "bg-[#27272a] text-white" : "text-[#71717a]"}`}
+              className={`flex-1 px-4 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center justify-center gap-2 ${viewMode === "Kanban" ? "bg-[#27272a] text-white" : "text-[#71717a]"}`}
               onClick={() => setViewMode("Kanban")}
             >
-              ⊞ Kanban
+              <FaTableCellsLarge size={12} />
+              Kanban
             </button>
           </div>
           <button 
-            className="bg-[#a78bfa] hover:bg-[#9061f9] text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/10 transition-all"
+            className="bg-[#a78bfa] hover:bg-[#9061f9] text-[#0c0c0f] px-6 py-2 rounded-xl font-black text-sm shadow-lg shadow-purple-500/10 transition-all flex items-center gap-2 active:scale-95"
             onClick={onAdd}
           >
-            + New Task
+            <FaPlus />
+            New Task
           </button>
         </div>
       </div>
@@ -96,7 +100,7 @@ export function Tasks({
                   }`}
                   onClick={() => onToggle(t)}
                 >
-                  {t.status === "Done" && "✓"}
+                  {t.status === "Done" && <FaCheck size={12} />}
                 </button>
                 
                 <div className="flex-1 min-w-0">
@@ -115,8 +119,12 @@ export function Tasks({
                 </div>
 
                 <div className="flex gap-1">
-                  <button className="p-2 text-[#71717a] hover:text-white transition-colors" onClick={() => onEdit(t)}>✎</button>
-                  <button className="p-2 text-[#71717a] hover:text-[#ef4444] transition-colors" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>✕</button>
+                  <button className="p-2 text-[#71717a] hover:text-white transition-colors" onClick={() => onEdit(t)}>
+                    <FaPenToSquare size={14} />
+                  </button>
+                  <button className="p-2 text-[#71717a] hover:text-[#ef4444] transition-colors" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>
+                    <FaTrashCan size={14} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -135,8 +143,12 @@ export function Tasks({
               <div className="font-bold text-white text-sm leading-tight">{t.title}</div>
               <div className="text-[10px] text-[#a78bfa] font-bold uppercase tracking-wider">{pName(t.projectId)}</div>
               <div className="flex gap-2 mt-4 pt-3 border-t border-[#1e1e24]">
-                <button className="text-[#71717a] hover:text-white text-sm" onClick={() => onEdit(t)}>✎</button>
-                <button className="text-[#71717a] hover:text-[#ef4444] text-sm" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>✕</button>
+                <button className="text-[#71717a] hover:text-white text-sm" onClick={() => onEdit(t)}>
+                  <FaPenToSquare />
+                </button>
+                <button className="text-[#71717a] hover:text-[#ef4444] text-sm" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>
+                  <FaTrashCan />
+                </button>
               </div>
             </div>
           )} 

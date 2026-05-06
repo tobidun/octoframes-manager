@@ -17,9 +17,10 @@ interface InvoicesProps {
   onDel: (id: string) => void;
   onStatus: (i: Invoice, s: any) => void;
   onPreview: (i: Invoice) => void;
+  onDownload: (i: Invoice) => void;
 }
 
-import { FiEye, FiEdit3, FiTrash2, FiDownload } from "react-icons/fi";
+import { FaEye, FaPenToSquare, FaTrashCan, FaDownload, FaPlus } from "react-icons/fa6";
 
 export function Invoices({
   invoices,
@@ -30,6 +31,7 @@ export function Invoices({
   onDel,
   onStatus,
   onPreview,
+  onDownload,
 }: InvoicesProps) {
   const [filter, setFilter] = useState("All");
   const filtered = invoices.filter(
@@ -67,10 +69,11 @@ export function Invoices({
           ))}
         </div>
         <button
-          className="bg-[#a78bfa] hover:bg-[#9061f9] text-white px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-purple-500/10 transition-all w-full md:w-auto"
+          className="bg-[#a78bfa] hover:bg-[#9061f9] text-[#0c0c0f] px-6 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-purple-500/10 transition-all w-full md:w-auto flex items-center justify-center gap-2 active:scale-95"
           onClick={onAdd}
         >
-          + New Invoice
+          <FaPlus />
+          New Invoice
         </button>
       </div>
 
@@ -134,21 +137,21 @@ export function Invoices({
                     onClick={() => onPreview(inv)}
                     title="Preview"
                   >
-                    <FiEye size={14} />
+                    <FaEye size={14} />
                   </button>
                   <button
                     className="flex-1 md:flex-none p-2.5 bg-[#27272a] hover:bg-[#3f3f46] text-[#a1a1aa] hover:text-white rounded-lg transition-colors flex items-center justify-center"
                     onClick={() => onEdit(inv)}
                     title="Edit"
                   >
-                    <FiEdit3 size={14} />
+                    <FaPenToSquare size={14} />
                   </button>
                   <button
                     className="flex-1 md:flex-none p-2.5 bg-[#27272a] hover:bg-[#3f3f46] text-[#a1a1aa] hover:text-white rounded-lg transition-colors flex items-center justify-center"
-                    onClick={() => onPreview(inv)}
+                    onClick={() => onDownload(inv)}
                     title="Download PDF"
                   >
-                    <FiDownload size={14} />
+                    <FaDownload size={14} />
                   </button>
                   <button
                     className="flex-1 md:flex-none p-2.5 bg-[#27272a] hover:bg-[#ef4444]/20 text-[#ef4444] rounded-lg transition-colors flex items-center justify-center"
@@ -157,7 +160,7 @@ export function Invoices({
                     }}
                     title="Delete"
                   >
-                    <FiTrash2 size={14} />
+                    <FaTrashCan size={14} />
                   </button>
                 </div>
               </div>

@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { FiLayout, FiUsers, FiBriefcase, FiCheckSquare, FiFileText, FiMenu, FiX } from "react-icons/fi";
+import { FaTableCellsLarge, FaUsers, FaBriefcase, FaCircleCheck, FaFileLines, FaBars, FaXmark } from "react-icons/fa6";
 
 const NAV_ITEMS = [
-  { name: "Dashboard", href: "/", icon: <FiLayout /> },
-  { name: "Clients", href: "/clients", icon: <FiUsers /> },
-  { name: "Projects", href: "/projects", icon: <FiBriefcase /> },
-  { name: "Tasks", href: "/tasks", icon: <FiCheckSquare /> },
-  { name: "Invoices", href: "/invoices", icon: <FiFileText /> },
+  { name: "Dashboard", href: "/", icon: <FaTableCellsLarge /> },
+  { name: "Clients", href: "/clients", icon: <FaUsers /> },
+  { name: "Projects", href: "/projects", icon: <FaBriefcase /> },
+  { name: "Tasks", href: "/tasks", icon: <FaCircleCheck /> },
+  { name: "Invoices", href: "/invoices", icon: <FaFileLines /> },
 ];
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -78,7 +78,7 @@ export function Navbar() {
               animate={{ rotate: isOpen ? 90 : 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
             >
-              {isOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+              {isOpen ? <FaXmark size={20} /> : <FaBars size={20} />}
             </motion.div>
           </button>
         </div>
@@ -103,7 +103,7 @@ export function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="absolute top-[73px] left-6 right-6 bg-[#111116] border border-[#1e1e24] rounded-3xl p-4 shadow-2xl overflow-hidden"
+              className="absolute top-[88px] left-6 right-6 bg-[#111116] border border-[#1e1e24] rounded-3xl p-4 shadow-2xl overflow-hidden"
             >
               <div className="flex flex-col gap-1">
                 {NAV_ITEMS.map((item, idx) => {

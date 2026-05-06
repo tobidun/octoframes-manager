@@ -7,9 +7,10 @@ import { Label, Input, Textarea, SaveButton } from "@/components/ui/FormElements
 interface ClientFormProps {
   initial?: Client | null;
   onSave: (client: Partial<Client>) => void;
+  loading?: boolean;
 }
 
-export function ClientForm({ initial, onSave }: ClientFormProps) {
+export function ClientForm({ initial, onSave, loading }: ClientFormProps) {
   const [f, setF] = useState(initial || { 
     name: "", 
     company: "", 
@@ -78,6 +79,7 @@ export function ClientForm({ initial, onSave }: ClientFormProps) {
       <SaveButton 
         onClick={() => onSave(f)} 
         disabled={!f.name}
+        loading={loading}
       >
         {initial ? "Update Client Profile" : "Create New Client"}
       </SaveButton>

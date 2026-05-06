@@ -5,18 +5,19 @@ import { useStudioApi } from "@/hooks/useStudioApi";
 import { Project, Client, Task } from "@/lib/types";
 import { Projects } from "@/components/features/Projects";
 import { Modal } from "@/components/ui/Modal";
+import { ProjectsSkeleton } from "@/components/ui/Skeleton";
 import { ProjectForm } from "@/components/features/Forms";
-import { DUMMY_CLIENTS, DUMMY_PROJECTS, DUMMY_TASKS } from "@/lib/dummyData";
 
 export default function ProjectsPage() {
-  const { data: projects, save: apiSave, remove: apiRemove, loading: projectsLoading } = useStudioApi<Project>("projects", DUMMY_PROJECTS);
-  const { data: clients, loading: clientsLoading } = useStudioApi<Client>("clients", DUMMY_CLIENTS);
-  const { data: tasks, loading: tasksLoading } = useStudioApi<Task>("tasks", DUMMY_TASKS);
+  const { data: projects, save: apiSave, remove: apiRemove, loading: projectsLoading } = useStudioApi<Project>("projects");
+  const { data: clients, loading: clientsLoading } = useStudioApi<Client>("clients");
+  const { data: tasks, loading: tasksLoading } = useStudioApi<Task>("tasks");
   
   const [modal, setModal] = useState(false);
   const [editItem, setEditItem] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<"List" | "Kanban">("List");
   const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -24,7 +25,9 @@ export default function ProjectsPage() {
   };
 
   const handleSave = async (item: any) => {
+    setSaving(true);
     const success = await apiSave(item);
+    setSaving(false);
     if (success) {
       flash(item.id ? "Project updated" : "Project created");
       setModal(false);
@@ -42,7 +45,7 @@ export default function ProjectsPage() {
   const cName = (id: string) => clients.find(c => c.id === id)?.name || "—";
 
   if (projectsLoading || clientsLoading || tasksLoading) {
-    return <div className="py-20 text-center animate-pulse font-black text-[#52525b] uppercase tracking-widest text-xs">Syncing Pipeline...</div>;
+    return <ProjectsSkeleton />;
   }
 
   return (
@@ -67,7 +70,7 @@ export default function ProjectsPage() {
 
       {modal && (
         <Modal title={editItem ? "Edit Project" : "Launch New Project"} onClose={() => setModal(false)}>
-          <ProjectForm initial={editItem} clients={clients} onSave={handleSave} />
+          <ProjectForm initial={editItem} clients={clients} onSave={handleSave} loading={saving} />
         </Modal>
       )}
 

@@ -12,25 +12,25 @@ export class Client {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   name!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   company?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   email?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   phone?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "varchar", nullable: true })
   location?: string;
 
   @Column({ type: "text", nullable: true })
   notes?: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   created!: string;
 
   @CreateDateColumn()

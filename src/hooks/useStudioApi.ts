@@ -1,31 +1,47 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 type EntityType = "clients" | "projects" | "invoices" | "tasks";
 
-export function useStudioApi<T>(entity: EntityType, initialData: T[]) {
-  const [data, setData] = useState<T[]>(initialData);
-  const [loading, setLoading] = useState(true);
+// Simple global cache to prevent redundant fetches across components
+const studioCache: Record<string, { data: any[]; timestamp: number }> = {};
+const CACHE_TTL = 30000; // 30 seconds
 
-  const refresh = async () => {
+export function useStudioApi<T>(entity: EntityType, options: { lazy?: boolean; skipCache?: boolean } = {}) {
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(!options.lazy);
+
+  const refresh = useCallback(async (force = false) => {
+    // Check cache first
+    if (!force && !options.skipCache && studioCache[entity]) {
+      const now = Date.now();
+      if (now - studioCache[entity].timestamp < CACHE_TTL) {
+        setData(studioCache[entity].data);
+        setLoading(false);
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const res = await fetch(`/api/${entity}`);
       const json = await res.json();
       if (Array.isArray(json)) {
         setData(json);
+        // Update cache
+        studioCache[entity] = { data: json, timestamp: Date.now() };
       }
     } catch (e) {
       console.error(`Failed to fetch ${entity}`, e);
     } finally {
       setLoading(false);
     }
-  };
+  }, [entity, options.skipCache]);
 
   useEffect(() => {
-    refresh();
-  }, [entity]);
+    if (!options.lazy) {
+      refresh();
+    }
+  }, [refresh, options.lazy]);
 
   const save = async (item: any) => {
     try {
@@ -40,7 +56,7 @@ export function useStudioApi<T>(entity: EntityType, initialData: T[]) {
       });
 
       if (res.ok) {
-        await refresh();
+        await refresh(true); // Force refresh cache on save
         return true;
       }
     } catch (e) {
@@ -55,7 +71,7 @@ export function useStudioApi<T>(entity: EntityType, initialData: T[]) {
         method: "DELETE",
       });
       if (res.ok) {
-        await refresh();
+        await refresh(true); // Force refresh cache on delete
         return true;
       }
     } catch (e) {
@@ -64,5 +80,5 @@ export function useStudioApi<T>(entity: EntityType, initialData: T[]) {
     return false;
   };
 
-  return { data, setData, loading, save, remove, refresh };
+  return { data, setData, loading, save, remove, refresh: () => refresh(true) };
 }

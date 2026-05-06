@@ -20,7 +20,7 @@ interface ProjectsProps {
   onStatus: (p: Project, s: any) => void;
 }
 
-import { FiList, FiGrid, FiPlus, FiSearch } from "react-icons/fi";
+import { FaList, FaTableCellsLarge, FaPlus, FaMagnifyingGlass } from "react-icons/fa6";
 
 export function Projects({ 
   projects, 
@@ -46,7 +46,7 @@ export function Projects({
       <div className="flex flex-col xl:flex-row gap-4 items-center justify-between">
         <div className="flex flex-1 gap-4 w-full max-w-2xl">
           <div className="relative flex-1 group">
-            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52525b] group-focus-within:text-[#a78bfa] transition-colors" />
+            <FaMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#52525b] group-focus-within:text-[#a78bfa] transition-colors" />
             <input 
               className="bg-[#111116] border border-[#1e1e24] rounded-xl pl-10 pr-4 py-2.5 text-sm w-full outline-none focus:border-[#a78bfa]/50 focus:ring-4 focus:ring-[#a78bfa]/5 transition-all placeholder:text-[#3f3f46]"
               placeholder="Search productions..."
@@ -75,14 +75,14 @@ export function Projects({
               className={`flex-1 xl:px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${viewMode === "List" ? "bg-[#a78bfa] text-[#0c0c0f] shadow-lg" : "text-[#52525b] hover:text-white"}`}
               onClick={() => setViewMode("List")}
             >
-              <FiList size={14} />
+              <FaList size={14} />
               List
             </button>
             <button 
               className={`flex-1 xl:px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${viewMode === "Kanban" ? "bg-[#a78bfa] text-[#0c0c0f] shadow-lg" : "text-[#52525b] hover:text-white"}`}
               onClick={() => setViewMode("Kanban")}
             >
-              <FiGrid size={14} />
+              <FaTableCellsLarge size={14} />
               Kanban
             </button>
           </div>
@@ -90,7 +90,7 @@ export function Projects({
             className="bg-[#a78bfa] hover:bg-[#9061f9] text-[#0c0c0f] px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-purple-500/10 transition-all whitespace-nowrap flex items-center gap-2 active:scale-95"
             onClick={onAdd}
           >
-            <FiPlus size={16} />
+            <FaPlus size={16} />
             New Project
           </button>
         </div>

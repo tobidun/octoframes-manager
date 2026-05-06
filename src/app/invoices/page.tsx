@@ -6,18 +6,20 @@ import { Invoice, Client, Project } from "@/lib/types";
 import { Invoices } from "@/components/features/Invoices";
 import { InvoicePreview } from "@/components/features/InvoicePreview";
 import { Modal } from "@/components/ui/Modal";
+import { InvoicesSkeleton } from "@/components/ui/Skeleton";
 import { InvoiceForm } from "@/components/features/Forms";
-import { DUMMY_CLIENTS, DUMMY_PROJECTS, DUMMY_INVOICES } from "@/lib/dummyData";
+import { generateInvoicePDF } from "@/lib/invoiceUtils";
 
 export default function InvoicesPage() {
-  const { data: invoices, save: apiSave, remove: apiRemove, loading: invoicesLoading } = useStudioApi<Invoice>("invoices", DUMMY_INVOICES);
-  const { data: clients, loading: clientsLoading } = useStudioApi<Client>("clients", DUMMY_CLIENTS);
-  const { data: projects, loading: projectsLoading } = useStudioApi<Project>("projects", DUMMY_PROJECTS);
+  const { data: invoices, save: apiSave, remove: apiRemove, loading: invoicesLoading } = useStudioApi<Invoice>("invoices");
+  const { data: clients, loading: clientsLoading } = useStudioApi<Client>("clients");
+  const { data: projects, loading: projectsLoading } = useStudioApi<Project>("projects");
   
   const [modal, setModal] = useState(false);
   const [editItem, setEditItem] = useState<Invoice | null>(null);
   const [invPreview, setInvPreview] = useState<Invoice | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -25,7 +27,9 @@ export default function InvoicesPage() {
   };
 
   const handleSave = async (item: any) => {
+    setSaving(true);
     const success = await apiSave(item);
+    setSaving(false);
     if (success) {
       flash(item.id ? "Invoice updated" : "Invoice generated");
       setModal(false);
@@ -43,8 +47,19 @@ export default function InvoicesPage() {
   const cName = (id: string) => clients.find(c => c.id === id)?.name || "—";
   const pName = (id: string) => projects.find(p => p.id === id)?.name || "—";
 
+  const handleDownload = async (inv: Invoice) => {
+    try {
+      flash("Generating PDF...");
+      await generateInvoicePDF(inv, cName, pName);
+      flash("Download started");
+    } catch (err) {
+      flash("Export failed. Please try again.");
+      console.error(err);
+    }
+  };
+
   if (invoicesLoading || clientsLoading || projectsLoading) {
-    return <div className="py-20 text-center animate-pulse font-black text-[#52525b] uppercase tracking-widest text-xs">Syncing Ledger...</div>;
+    return <InvoicesSkeleton />;
   }
 
   return (
@@ -63,13 +78,17 @@ export default function InvoicesPage() {
         onAdd={() => { setEditItem(null); setModal(true); }}
         onEdit={(i) => { setEditItem(i); setModal(true); }}
         onDel={handleDel}
-        onStatus={(inv, s) => handleSave({ ...inv, status: s })}
+        onStatus={(inv, s) => {
+          flash("Updating status...");
+          handleSave({ ...inv, status: s });
+        }}
         onPreview={setInvPreview}
+        onDownload={handleDownload}
       />
 
       {modal && (
         <Modal title={editItem ? "Edit Invoice" : "Generate New Invoice"} onClose={() => setModal(false)} wide>
-          <InvoiceForm initial={editItem} clients={clients} projects={projects} onSave={handleSave} />
+          <InvoiceForm initial={editItem} clients={clients} projects={projects} onSave={handleSave} loading={saving} />
         </Modal>
       )}
 

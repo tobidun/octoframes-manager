@@ -11,9 +11,10 @@ interface TaskFormProps {
   initial?: Task | null;
   projects: Project[];
   onSave: (task: Partial<Task>) => void;
+  loading?: boolean;
 }
 
-export function TaskForm({ initial, projects, onSave }: TaskFormProps) {
+export function TaskForm({ initial, projects, onSave, loading }: TaskFormProps) {
   const [f, setF] = useState<any>(initial || { 
     title: "", 
     projectId: "", 
@@ -83,6 +84,7 @@ export function TaskForm({ initial, projects, onSave }: TaskFormProps) {
       <SaveButton 
         onClick={() => onSave(f)} 
         disabled={!f.title || !f.projectId}
+        loading={loading}
       >
         {initial ? "Save Changes" : "Assign Task"}
       </SaveButton>

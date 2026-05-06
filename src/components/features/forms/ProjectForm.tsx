@@ -11,9 +11,10 @@ interface ProjectFormProps {
   initial?: Project | null;
   clients: Client[];
   onSave: (project: Partial<Project>) => void;
+  loading?: boolean;
 }
 
-export function ProjectForm({ initial, clients, onSave }: ProjectFormProps) {
+export function ProjectForm({ initial, clients, onSave, loading }: ProjectFormProps) {
   const [f, setF] = useState<any>(initial || { 
     name: "", 
     clientId: "", 
@@ -106,6 +107,7 @@ export function ProjectForm({ initial, clients, onSave }: ProjectFormProps) {
       <SaveButton 
         onClick={() => onSave(f)} 
         disabled={!f.name || !f.clientId}
+        loading={loading}
       >
         {initial ? "Update Project" : "Launch Project"}
       </SaveButton>
