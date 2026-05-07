@@ -92,39 +92,43 @@ export function Tasks({
             {filtered.map(t => (
               <div 
                 key={t.id} 
-                className={`flex items-center gap-4 bg-[#16161a] border border-[#1e1e24] rounded-xl p-4 hover:border-[#a78bfa]/30 transition-all ${t.status === "Done" ? "opacity-60" : "opacity-100"}`}
+                className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-[#16161a] border border-[#1e1e24] rounded-xl p-4 hover:border-[#a78bfa]/30 transition-all ${t.status === "Done" ? "opacity-60" : "opacity-100"}`}
               >
-                <button 
-                  className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center text-white text-xs transition-all ${
-                    t.status === "Done" ? "bg-[#34d399] border-[#34d399]" : "border-[#3f3f46] hover:border-[#a78bfa]"
-                  }`}
-                  onClick={() => onToggle(t)}
-                >
-                  {t.status === "Done" && <FaCheck size={12} />}
-                </button>
-                
-                <div className="flex-1 min-w-0">
-                  <div className={`font-semibold text-white text-sm md:text-base truncate ${t.status === "Done" ? "line-through text-[#71717a]" : ""}`}>
-                    {t.title}
-                  </div>
-                  <div className="text-[10px] text-[#71717a] mt-1 flex items-center gap-2">
-                    <span className="font-bold text-[#a78bfa] uppercase">{pName(t.projectId)}</span>
-                    {t.dueDate && <span>• Due {t.dueDate}</span>}
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <button 
+                    className={`w-6 h-6 shrink-0 rounded-lg border-2 flex items-center justify-center text-white text-xs transition-all ${
+                      t.status === "Done" ? "bg-[#34d399] border-[#34d399]" : "border-[#3f3f46] hover:border-[#a78bfa]"
+                    }`}
+                    onClick={() => onToggle(t)}
+                  >
+                    {t.status === "Done" && <FaCheck size={12} />}
+                  </button>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-semibold text-white text-sm md:text-base truncate ${t.status === "Done" ? "line-through text-[#71717a]" : ""}`}>
+                      {t.title}
+                    </div>
+                    <div className="text-[10px] text-[#71717a] mt-1 flex flex-wrap items-center gap-x-2">
+                      <span className="font-bold text-[#a78bfa] uppercase">{pName(t.projectId)}</span>
+                      {t.dueDate && <span className="before:content-['•'] before:mr-2">Due {t.dueDate}</span>}
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <Badge text={t.priority} />
-                  <Badge text={t.status} className="hidden sm:inline-block" />
-                </div>
+                <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-4 pl-10 sm:pl-0 border-t border-[#1e1e24] pt-3 sm:border-t-0 sm:pt-0">
+                  <div className="flex gap-2">
+                    <Badge text={t.priority} />
+                    <Badge text={t.status} className="hidden xs:inline-block" />
+                  </div>
 
-                <div className="flex gap-1">
-                  <button className="p-2 text-[#71717a] hover:text-white transition-colors" onClick={() => onEdit(t)}>
-                    <FaPenToSquare size={14} />
-                  </button>
-                  <button className="p-2 text-[#71717a] hover:text-[#ef4444] transition-colors" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>
-                    <FaTrashCan size={14} />
-                  </button>
+                  <div className="flex gap-1">
+                    <button className="p-2 text-[#71717a] hover:text-white transition-colors" onClick={() => onEdit(t)}>
+                      <FaPenToSquare size={14} />
+                    </button>
+                    <button className="p-2 text-[#71717a] hover:text-[#ef4444] transition-colors" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>
+                      <FaTrashCan size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -136,9 +140,9 @@ export function Tasks({
           cols={TASK_STATUS} 
           render={t => (
             <div className="space-y-3">
-              <div className="flex justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <Badge text={t.priority} />
-                <div className="text-[10px] text-[#52525b]">{t.dueDate || ""}</div>
+                <div className="text-[10px] text-[#52525b] whitespace-nowrap">{t.dueDate || ""}</div>
               </div>
               <div className="font-bold text-white text-sm leading-tight">{t.title}</div>
               <div className="text-[10px] text-[#a78bfa] font-bold uppercase tracking-wider">{pName(t.projectId)}</div>

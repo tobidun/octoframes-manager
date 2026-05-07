@@ -309,9 +309,9 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, pName, on
             ) : (
               todaysAgenda.slice(0, 5).map(t => (
                 <div key={t.id} className={`bg-[#111116] border-l-[4px] border border-[#1e1e24] rounded-2xl p-5 hover:bg-[#16161a] transition-colors ${t.priority === 'Urgent' ? 'border-l-[#ef4444]' : 'border-l-[#a78bfa]'}`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-sm font-bold text-white">{t.title}</div>
-                    <div className={`px-2 py-0.5 border rounded-full text-[9px] font-black uppercase ${
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="text-sm font-bold text-white flex-1">{t.title}</div>
+                    <div className={`shrink-0 px-2 py-0.5 border rounded-full text-[9px] font-black uppercase ${
                       t.priority === 'Urgent' 
                         ? 'bg-[#ef4444]/10 border-[#ef4444]/20 text-[#ef4444]' 
                         : 'bg-[#a78bfa]/10 border-[#a78bfa]/20 text-[#a78bfa]'
@@ -319,14 +319,14 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, pName, on
                       {t.priority}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-[10px] font-bold text-[#71717a]">
-                    <div className="flex items-center gap-1">
-                      <FaClock size={12} />
+                  <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-[10px] font-bold text-[#71717a]">
+                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                      <FaClock size={12} className="text-[#a78bfa]" />
                       Due {t.dueDate || "Asap"}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <FaBriefcase size={12} />
-                      {pName(t.projectId)}
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <FaBriefcase size={12} className="text-[#a78bfa] shrink-0" />
+                      <span className="truncate">{pName(t.projectId)}</span>
                     </div>
                   </div>
                 </div>

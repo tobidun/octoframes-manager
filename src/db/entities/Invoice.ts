@@ -54,7 +54,7 @@ export class Invoice {
   @Column({ type: "varchar", nullable: true })
   dueDate?: string;
 
-  @Column({ type: "decimal", precision: 5, scale: 2, default: 0 })
+  @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
   taxRate!: number;
 
   @Column({ type: "text", nullable: true })
