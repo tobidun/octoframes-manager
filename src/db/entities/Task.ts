@@ -6,6 +6,7 @@ import {
   ManyToOne,
   type Relation,
 } from "typeorm";
+import { Project } from "./Project";
 import type { TaskStatus, Priority } from "@/lib/types";
 
 @Entity("tasks")
@@ -19,8 +20,8 @@ export class Task {
   @Column({ type: "uuid" })
   projectId!: string;
 
-  @ManyToOne("Project", "tasks")
-  project!: Relation<unknown>;
+  @ManyToOne(() => Project, (project) => project.tasks)
+  project!: Relation<Project>;
 
   @Column({
     type: "enum",

@@ -6,6 +6,8 @@ import {
   OneToMany,
   type Relation,
 } from "typeorm";
+import { Project } from "./Project";
+import { Invoice } from "./Invoice";
 
 @Entity("clients")
 export class Client {
@@ -36,9 +38,9 @@ export class Client {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @OneToMany("Project", "client")
-  projects!: Relation<unknown[]>;
+  @OneToMany(() => Project, (project) => project.client)
+  projects!: Relation<Project[]>;
 
-  @OneToMany("Invoice", "client")
-  invoices!: Relation<unknown[]>;
+  @OneToMany(() => Invoice, (invoice) => invoice.client)
+  invoices!: Relation<Invoice[]>;
 }

@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, type Relation } from "typeorm";
+import { Invoice } from "./Invoice";
 
 @Entity("invoice_items")
 export class InvoiceItem {
@@ -17,6 +18,6 @@ export class InvoiceItem {
   @Column({ type: "uuid" })
   invoiceId!: string;
 
-  @ManyToOne("Invoice", "items", { onDelete: "CASCADE" })
-  invoice!: Relation<unknown>;
+  @ManyToOne(() => Invoice, (invoice) => invoice.items, { onDelete: "CASCADE" })
+  invoice!: Relation<Invoice>;
 }

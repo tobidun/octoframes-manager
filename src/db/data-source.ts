@@ -6,6 +6,7 @@ import { Project } from "./entities/Project";
 import { Task } from "./entities/Task";
 import { Invoice } from "./entities/Invoice";
 import { InvoiceItem } from "./entities/InvoiceItem";
+import { InitialSchema1778059590065 } from "./migrations/1778059590065-InitialSchema";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -18,9 +19,13 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: process.env.NODE_ENV === "development",
   entities: [Client, Project, Task, Invoice, InvoiceItem],
-  migrations: [__dirname + "/migrations/*.ts"],
+  migrations: [InitialSchema1778059590065],
   subscribers: [],
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : (process.env.DATABASE_URL?.includes("neon") ? { rejectUnauthorized: false } : false),
+  ssl: process.env.NODE_ENV === "production" 
+    ? { rejectUnauthorized: false } 
+    : (process.env.DATABASE_URL?.includes("neon") || process.env.DATABASE_URL?.includes("render.com") 
+        ? { rejectUnauthorized: false } 
+        : false),
 });
 
 let isInitialized = false;

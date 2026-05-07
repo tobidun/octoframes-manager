@@ -7,6 +7,9 @@ import {
   OneToMany,
   type Relation,
 } from "typeorm";
+import { Client } from "./Client";
+import { Task } from "./Task";
+import { Invoice } from "./Invoice";
 import type { ProjectStatus } from "@/lib/types";
 
 @Entity("projects")
@@ -20,8 +23,8 @@ export class Project {
   @Column({ type: "uuid" })
   clientId!: string;
 
-  @ManyToOne("Client", "projects")
-  client!: Relation<unknown>;
+  @ManyToOne(() => Client, (client) => client.projects)
+  client!: Relation<Client>;
 
   @Column({
     type: "enum",
@@ -51,9 +54,9 @@ export class Project {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @OneToMany("Task", "project")
-  tasks!: Relation<unknown[]>;
+  @OneToMany(() => Task, (task) => task.project)
+  tasks!: Relation<Task[]>;
 
-  @OneToMany("Invoice", "project")
-  invoices!: Relation<unknown[]>;
+  @OneToMany(() => Invoice, (invoice) => invoice.project)
+  invoices!: Relation<Invoice[]>;
 }

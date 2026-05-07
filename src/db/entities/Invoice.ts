@@ -7,6 +7,9 @@ import {
   OneToMany,
   type Relation,
 } from "typeorm";
+import { Client } from "./Client";
+import { Project } from "./Project";
+import { InvoiceItem } from "./InvoiceItem";
 import type { InvoiceStatus } from "@/lib/types";
 
 @Entity("invoices")
@@ -20,8 +23,8 @@ export class Invoice {
   @Column({ type: "uuid" })
   clientId!: string;
 
-  @ManyToOne("Client", "invoices")
-  client!: Relation<unknown>;
+  @ManyToOne(() => Client, (client) => client.invoices)
+  client!: Relation<Client>;
 
   @Column({ type: "varchar", nullable: true })
   customClient?: string;
@@ -29,8 +32,8 @@ export class Invoice {
   @Column({ type: "uuid", nullable: true })
   projectId?: string;
 
-  @ManyToOne("Project", "invoices", { nullable: true })
-  project?: Relation<unknown>;
+  @ManyToOne(() => Project, (project) => project.invoices, { nullable: true })
+  project?: Relation<Project>;
 
   @Column({ type: "varchar", nullable: true })
   customProject?: string;
@@ -57,8 +60,8 @@ export class Invoice {
   @Column({ type: "text", nullable: true })
   notes?: string;
 
-  @OneToMany("InvoiceItem", "invoice", { cascade: true })
-  items!: Relation<unknown[]>;
+  @OneToMany(() => InvoiceItem, (item) => item.invoice, { cascade: true })
+  items!: Relation<InvoiceItem[]>;
 
   @Column({ type: "varchar" })
   created!: string;
