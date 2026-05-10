@@ -3,10 +3,24 @@ export const STUDIO_TAGLINE = "Client & Project Manager";
 export const STUDIO_SUPPORT_EMAIL = "support@studiomanager.io";
 
 export const TABS = ["Dashboard", "Clients", "Projects", "Tasks", "Invoices"];
-export const PROJECT_STATUS = ["Discovery", "In Progress", "Review", "Delivered", "Archived"] as const;
+export const PROJECT_STATUS = [
+  "Discovery",
+  "In Progress",
+  "Review",
+  "Delivered",
+  "Archived",
+] as const;
 export const TASK_STATUS = ["To Do", "In Progress", "Done"] as const;
 export const PRIORITIES = ["Low", "Medium", "High", "Urgent"] as const;
-export const SERVICE_TYPES = ["Design", "Development", "Consulting", "Marketing", "Video Production", "Photography", "Copywriting", "Strategy", "Social Media", "Other"];
+export const SERVICE_TYPES = [
+  "Motion Graphics",
+  "2D Animation",
+  "Explainer Video",
+  "Video Editing",
+  "Brand Animation",
+  "Social Media Content",
+  "Other",
+];
 export const CURRENCIES = [
   { code: "GBP", symbol: "£", label: "£ GBP" },
   { code: "NGN", symbol: "₦", label: "₦ NGN" },
@@ -14,7 +28,13 @@ export const CURRENCIES = [
   { code: "USD", symbol: "$", label: "$ USD" },
   { code: "EUR", symbol: "€", label: "€ EUR" },
 ];
-export const INVOICE_STATUS = ["Draft", "Sent", "Paid", "Overdue", "Cancelled"] as const;
+export const INVOICE_STATUS = [
+  "Draft",
+  "Sent",
+  "Paid",
+  "Overdue",
+  "Cancelled",
+] as const;
 
 export const STATUS_COLORS: Record<string, string> = {
   Discovery: "#a78bfa",
