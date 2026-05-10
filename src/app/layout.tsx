@@ -9,8 +9,8 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "Octoframes Studio Manager",
-  description: "Professional studio management system by Octoframes",
+  title: "Studio Manager",
+  description: "Professional client and project management system",
 };
 
 import { Navbar } from "@/components/layout/Navbar";

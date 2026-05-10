@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { FaTableCellsLarge, FaUsers, FaBriefcase, FaCircleCheck, FaFileLines, FaBars, FaXmark } from "react-icons/fa6";
+import { STUDIO_NAME, STUDIO_TAGLINE } from "@/lib/constants";
 
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/", icon: <FaTableCellsLarge /> },
@@ -41,8 +42,8 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-3 group">
             <span className="text-2xl sm:text-3xl font-black text-[#a78bfa] tracking-tighter group-hover:scale-110 transition-transform">⬡</span>
             <div>
-              <div className="text-sm sm:text-base font-black text-white tracking-widest leading-none">OCTOFRAMES</div>
-              <div className="text-[9px] sm:text-[10px] font-bold text-[#71717a] uppercase tracking-[0.2em] mt-1">Studio Manager</div>
+              <div className="text-sm sm:text-base font-black text-white tracking-widest leading-none">{STUDIO_NAME}</div>
+              <div className="text-[9px] sm:text-[10px] font-bold text-[#71717a] uppercase tracking-[0.2em] mt-1">{STUDIO_TAGLINE}</div>
             </div>
           </Link>
 

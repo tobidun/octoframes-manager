@@ -65,10 +65,10 @@ export function InvoicePreview({ invoice, cName, pName }: InvPreviewProps) {
             <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-16">
               <div>
                 <div className="text-2xl font-black text-[#a78bfa] tracking-[0.25em] mb-2">
-                  OCTOFRAMES
+                  YOUR STUDIO
                 </div>
                 <div className="text-[10px] text-[#52525b] font-black uppercase tracking-[0.3em]">
-                  Technical Animation Studio
+                  Professional Services
                 </div>
               </div>
               <div className="md:text-right">
@@ -224,10 +224,10 @@ export function InvoicePreview({ invoice, cName, pName }: InvPreviewProps) {
 
           {/* Footer */}
           <div className="bg-[#0c0c0f] px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] font-black text-[#3f3f46] uppercase tracking-widest">
-            <div>Octoframes Studio © 2026</div>
+            <div>Studio Manager © 2026</div>
             <div className="flex gap-6">
               <span>Terms of Service</span>
-              <span>Support@octoframes.io</span>
+              <span>support@studiomanager.io</span>
             </div>
           </div>
         </div>

@@ -4,9 +4,9 @@ import { Invoice } from "./types";
 import { fmtMoney } from "./utils";
 
 export const generateInvoicePDF = async (
-  invoice: Invoice, 
-  cName: (id: string) => string, 
-  pName: (id: string) => string
+  invoice: Invoice,
+  cName: (id: string) => string,
+  pName: (id: string) => string,
 ) => {
   // Create a hidden container to render the invoice
   const container = document.createElement("div");
@@ -17,16 +17,20 @@ export const generateInvoicePDF = async (
   container.style.zIndex = "-9999";
   document.body.appendChild(container);
 
-  const sub = Number(invoice.amount) || (invoice.items || []).reduce(
-    (s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0),
-    0,
-  );
+  const sub =
+    Number(invoice.amount) ||
+    (invoice.items || []).reduce(
+      (s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0),
+      0,
+    );
   const tax = (sub * (Number(invoice.taxRate) || 0)) / 100;
   const total = sub + tax;
   const cur = invoice.currency || "GBP";
 
   const clientLabel = invoice.customClient || cName(invoice.clientId);
-  const projectLabel = invoice.customProject || (invoice.projectId ? pName(invoice.projectId) : "");
+  const projectLabel =
+    invoice.customProject ||
+    (invoice.projectId ? pName(invoice.projectId) : "");
 
   container.innerHTML = `
     <div style="background-color: #111116; color: white; font-family: sans-serif; padding: 60px; border: 1px solid #1e1e24; min-height: 1131px; display: flex; flex-direction: column;">
@@ -68,7 +72,11 @@ export const generateInvoicePDF = async (
           </div>
         </div>
 
-        ${invoice.items && invoice.items.length > 0 && invoice.items.some(i => i.description) ? `
+        ${
+          invoice.items &&
+          invoice.items.length > 0 &&
+          invoice.items.some((i) => i.description)
+            ? `
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 60px;">
             <thead>
               <tr style="text-align: left; font-size: 10px; font-weight: 900; color: #52525b; text-transform: uppercase; letter-spacing: 0.1em;">
@@ -79,17 +87,23 @@ export const generateInvoicePDF = async (
               </tr>
             </thead>
             <tbody>
-              ${invoice.items.map(item => `
+              ${invoice.items
+                .map(
+                  (item) => `
                 <tr style="font-size: 13px; color: #a1a1aa; border-bottom: 1px solid #1e1e2433;">
                   <td style="padding: 16px; font-weight: bold; color: white;">${item.description}</td>
                   <td style="padding: 16px; text-align: center;">${item.qty}</td>
                   <td style="padding: 16px; text-align: right;">${fmtMoney(item.rate, cur)}</td>
                   <td style="padding: 16px; text-align: right; font-weight: 900; color: white;">${fmtMoney((Number(item.qty) || 0) * (Number(item.rate) || 0), cur)}</td>
                 </tr>
-              `).join('')}
+              `,
+                )
+                .join("")}
             </tbody>
           </table>
-        ` : ''}
+        `
+            : ""
+        }
 
         <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-top: 32px; border-top: 1px solid #1e1e24;">
           <div style="width: 50%;">
@@ -103,12 +117,16 @@ export const generateInvoicePDF = async (
               <span>Subtotal</span>
               <span>${fmtMoney(sub, cur)}</span>
             </div>
-            ${Number(invoice.taxRate) > 0 ? `
+            ${
+              Number(invoice.taxRate) > 0
+                ? `
               <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #71717a; margin-bottom: 24px;">
                 <span>VAT / Tax (${invoice.taxRate}%)</span>
                 <span>${fmtMoney(tax, cur)}</span>
               </div>
-            ` : ''}
+            `
+                : ""
+            }
             <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid #1e1e24; padding-top: 24px;">
               <span style="font-size: 10px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 0.2em;">Total</span>
               <span style="font-size: 28px; font-weight: 900; color: #a78bfa;">${fmtMoney(total, cur)}</span>
@@ -125,7 +143,7 @@ export const generateInvoicePDF = async (
   `;
 
   // Wait for a brief moment to ensure styles/images are processed
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
   try {
     const canvas = await html2canvas(container, {
@@ -140,8 +158,10 @@ export const generateInvoicePDF = async (
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-    const fileName = (invoice.invoiceNumber || (invoice.id ? invoice.id.slice(0, 6) : "NEW")).toUpperCase();
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight, undefined, "FAST");
+    const fileName = (
+      invoice.invoiceNumber || (invoice.id ? invoice.id.slice(0, 6) : "NEW")
+    ).toUpperCase();
     pdf.save(`Invoice-${fileName}.pdf`);
   } catch (err) {
     console.error("PDF Error:", err);
