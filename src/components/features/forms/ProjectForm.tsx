@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Project, Client } from "@/lib/types";
 import { PROJECT_STATUS, SERVICE_TYPES, CURRENCIES } from "@/lib/constants";
-import { Label, Input, Textarea, SaveButton } from "@/components/ui/FormElements";
+import { Label, Input, Textarea, SaveButton, PriceInput } from "@/components/ui/FormElements";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { CustomDatePicker } from "@/components/ui/CustomDatePicker";
 
@@ -72,11 +72,10 @@ export function ProjectForm({ initial, clients, onSave, loading }: ProjectFormPr
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
           <Label>Budget Allocation</Label>
-          <Input 
-            type="number" 
-            placeholder="0.00" 
-            value={f.budget} 
-            onChange={(e) => setF({...f, budget: e.target.value})} 
+          <PriceInput
+            placeholder="0.00"
+            value={f.budget}
+            onChange={(raw) => setF({...f, budget: raw})}
           />
         </div>
         <div>

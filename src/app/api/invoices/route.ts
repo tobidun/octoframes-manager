@@ -28,8 +28,17 @@ export async function POST(req: Request) {
     
     const invoice = repo.create({
       ...invoiceData,
+      // Coerce empty strings to null for UUID and optional fields
+      projectId: invoiceData.projectId || null,
+      clientId: invoiceData.clientId || null,
+      customClient: invoiceData.customClient || null,
+      customProject: invoiceData.customProject || null,
+      dueDate: invoiceData.dueDate || null,
+      notes: invoiceData.notes || null,
+      amount: Number(invoiceData.amount) || 0,
+      taxRate: Number(invoiceData.taxRate) || 0,
       created: new Date().toISOString().split("T")[0],
-      items: items.map((item: any) => ({
+      items: (items || []).map((item: any) => ({
         ...item,
         qty: Number(item.qty),
         rate: Number(item.rate)

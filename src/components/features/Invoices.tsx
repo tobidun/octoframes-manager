@@ -5,6 +5,7 @@ import { Invoice, Client, Project } from "@/lib/types";
 import { INVOICE_STATUS } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
 import { fmtMoney } from "@/lib/utils";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 
 interface InvoicesProps {
   invoices: Invoice[];
@@ -34,12 +35,13 @@ export function Invoices({
   onDownload,
 }: InvoicesProps) {
   const [filter, setFilter] = useState("All");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const filtered = invoices.filter(
     (i) => filter === "All" || i.status === filter,
   );
 
   const invTotal = (inv: Invoice) => {
-    const sub = inv.items.reduce(
+    const sub = Number(inv.amount) || inv.items.reduce(
       (s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0),
       0,
     );
@@ -155,9 +157,7 @@ export function Invoices({
                   </button>
                   <button
                     className="flex-1 md:flex-none p-2.5 bg-[#27272a] hover:bg-[#ef4444]/20 text-[#ef4444] rounded-lg transition-colors flex items-center justify-center"
-                    onClick={() => {
-                      if (confirm("Delete?")) onDel(inv.id);
-                    }}
+                    onClick={() => setDeleteId(inv.id)}
                     title="Delete"
                   >
                     <FaTrashCan size={14} />
@@ -168,6 +168,18 @@ export function Invoices({
           })}
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId) onDel(deleteId);
+          setDeleteId(null);
+        }}
+        title="Delete Invoice"
+        message="Are you sure you want to delete this invoice? This action will remove it from your records."
+        confirmText="Delete Invoice"
+      />
     </div>
   );
 }

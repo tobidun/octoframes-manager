@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useStudioApi } from "@/hooks/useStudioApi";
 import { Client, Project } from "@/lib/types";
 import { Clients } from "@/components/features/Clients";
@@ -9,6 +10,7 @@ import { ClientsSkeleton } from "@/components/ui/Skeleton";
 import { ClientForm } from "@/components/features/Forms";
 
 export default function ClientsPage() {
+  const router = useRouter();
   const { data: clients, save: apiSave, remove: apiRemove, loading: clientsLoading } = useStudioApi<Client>("clients");
   const { data: projects, loading: projectsLoading } = useStudioApi<Project>("projects");
   
@@ -57,6 +59,7 @@ export default function ClientsPage() {
         onAdd={() => { setEditItem(null); setModal(true); }}
         onEdit={(c) => { setEditItem(c); setModal(true); }}
         onDel={handleDel}
+        onInvoice={(id) => router.push(`/invoices?clientId=${id}`)}
       />
 
       {modal && (

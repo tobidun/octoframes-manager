@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { Invoice, Client, Project } from "@/lib/types";
 import { CURRENCIES } from "@/lib/constants";
-import { today } from "@/lib/utils";
+import { today, fmtMoney } from "@/lib/utils";
 import {
   Label,
   Input,
   Textarea,
   SaveButton,
+  PriceInput,
 } from "@/components/ui/FormElements";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { CustomDatePicker } from "@/components/ui/CustomDatePicker";
@@ -29,22 +30,22 @@ export function InvoiceForm({
   onSave,
   loading,
 }: InvoiceFormProps) {
-  const [f, setF] = useState<any>(
-    initial || {
-      invoiceNumber: "",
-      clientId: "",
-      customClient: "",
-      projectId: "",
-      customProject: "",
-      currency: "GBP",
-      status: "Draft",
-      issueDate: today(),
-      dueDate: "",
-      taxRate: "0",
-      notes: "",
-      items: [{ description: "", qty: "1", rate: "" }],
-    },
-  );
+  const [f, setF] = useState<any>({
+    invoiceNumber: "",
+    clientId: "",
+    customClient: "",
+    projectId: "",
+    customProject: "",
+    currency: "GBP",
+    status: "Draft",
+    issueDate: today(),
+    dueDate: "",
+    taxRate: "0",
+    amount: "0",
+    notes: "",
+    items: [{ description: "", qty: "1", rate: "" }],
+    ...initial
+  });
 
   const [manualClient, setManualClient] = useState(!!initial?.customClient);
   const [manualProject, setManualProject] = useState(!!initial?.customProject);
@@ -63,6 +64,18 @@ export function InvoiceForm({
   };
 
   const hasClient = manualClient ? f.customClient?.trim() : f.clientId;
+
+  // Live calculation
+  const directAmount = Number(f.amount) || 0;
+  const itemsTotal = (f.items || []).reduce(
+    (s: number, i: any) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0),
+    0
+  );
+  // Use direct amount if set (>0), else sum from items
+  const subtotal = directAmount > 0 ? directAmount : itemsTotal;
+  const taxAmount = (subtotal * (Number(f.taxRate) || 0)) / 100;
+  const total = subtotal + taxAmount;
+  const cur = f.currency || "GBP";
 
   return (
     <div className="space-y-6">
@@ -118,7 +131,7 @@ export function InvoiceForm({
 
         <div>
           <div className="flex justify-between items-center mb-1.5">
-            <Label>Linked Project</Label>
+            <Label>Linked Project (Optional)</Label>
             <button
               type="button"
               className="text-[10px] font-black text-[#a78bfa] uppercase tracking-widest hover:underline"
@@ -164,19 +177,42 @@ export function InvoiceForm({
         </div>
       </div>
 
-      <div>
-        <Label>Tax Rate (%)</Label>
-        <Input
-          type="number"
-          placeholder="0"
-          value={f.taxRate}
-          onChange={(e) => setF({ ...f, taxRate: e.target.value })}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Label>Billable Amount (Subtotal)</Label>
+            {directAmount > 0 && (
+              <span className="text-[9px] font-black text-[#34d399] uppercase tracking-widest bg-[#34d399]/10 px-2 py-0.5 rounded-full">Active</span>
+            )}
+          </div>
+          <PriceInput
+            placeholder="0.00"
+            value={f.amount}
+            onChange={(raw) => setF({ ...f, amount: raw })}
+          />
+          {directAmount > 0 && itemsTotal > 0 && (
+            <p className="text-[10px] text-[#f59e0b] mt-1.5 ml-1">⚠ Direct amount overrides item rates</p>
+          )}
+        </div>
+        <div>
+          <Label>Tax Rate (%)</Label>
+          <Input
+            type="number"
+            placeholder="0"
+            value={f.taxRate}
+            onChange={(e) => setF({ ...f, taxRate: e.target.value })}
+          />
+        </div>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label>Line Items</Label>
+          <div className="flex items-center gap-2">
+            <Label>Line Items</Label>
+            {directAmount === 0 && itemsTotal > 0 && (
+              <span className="text-[9px] font-black text-[#34d399] uppercase tracking-widest bg-[#34d399]/10 px-2 py-0.5 rounded-full">Active</span>
+            )}
+          </div>
           <button
             type="button"
             className="text-[10px] font-black text-[#a78bfa] uppercase tracking-widest flex items-center gap-1 hover:text-[#9061f9]"
@@ -210,11 +246,10 @@ export function InvoiceForm({
                   />
                 </div>
                 <div className="flex-1 sm:w-28">
-                  <Input 
-                    type="number" 
-                    placeholder="Rate" 
-                    value={item.rate} 
-                    onChange={(e) => updateItem(i, "rate", e.target.value)} 
+                  <PriceInput
+                    placeholder="Rate"
+                    value={item.rate}
+                    onChange={(raw) => updateItem(i, "rate", raw)}
                   />
                 </div>
                 <button 
@@ -227,6 +262,25 @@ export function InvoiceForm({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Live Calculation Summary */}
+      <div className="bg-[#111116] border border-[#1e1e24] rounded-2xl p-5 space-y-3">
+        <div className="text-[10px] font-black text-[#52525b] uppercase tracking-widest mb-4">Invoice Summary</div>
+        <div className="flex justify-between text-sm text-[#71717a] font-bold">
+          <span>Subtotal {directAmount > 0 ? "(Direct Amount)" : itemsTotal > 0 ? "(From Items)" : ""}</span>
+          <span className="text-white">{fmtMoney(subtotal, cur)}</span>
+        </div>
+        {Number(f.taxRate) > 0 && (
+          <div className="flex justify-between text-sm text-[#71717a] font-bold">
+            <span>Tax ({f.taxRate}%)</span>
+            <span className="text-[#f59e0b]">+ {fmtMoney(taxAmount, cur)}</span>
+          </div>
+        )}
+        <div className="flex justify-between items-baseline pt-3 border-t border-[#1e1e24]">
+          <span className="text-[10px] font-black text-[#a1a1aa] uppercase tracking-widest">Total</span>
+          <span className="text-2xl font-black text-[#a78bfa]">{fmtMoney(total, cur)}</span>
         </div>
       </div>
 
@@ -246,3 +300,4 @@ export function InvoiceForm({
     </div>
   );
 }
+

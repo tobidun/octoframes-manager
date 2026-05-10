@@ -33,6 +33,7 @@ interface DashboardProps {
 
 export function Dashboard({ clients, projects, tasks, invoices, cName, pName, onLoadDemo, onMarkAllDone }: DashboardProps) {
   const [showDoneModal, setShowDoneModal] = useState(false);
+  const [activeCur, setActiveCur] = useState<string | null>(null);
   const active = projects.filter(p => !["Archived", "Delivered"].includes(p.status));
   const pending = tasks.filter(t => t.status !== "Done");
   
@@ -46,12 +47,21 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, pName, on
   const urgentCount = tasks.filter(t => t.priority === "Urgent" && t.status !== "Done").length;
   
   const invTotal = (inv: Invoice) => {
-    const sub = inv.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0), 0);
+    const sub = Number(inv.amount) || inv.items.reduce((s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0), 0);
     return sub + sub * (Number(inv.taxRate) || 0) / 100;
   };
 
-  const totalInvoiced = invoices.reduce((s, i) => s + invTotal(i), 0);
-  const paidRevenue = invoices.filter(i => i.status === "Paid").reduce((s, i) => s + invTotal(i), 0);
+  const revByCur = invoices.reduce((acc: any, inv) => {
+    const cur = inv.currency || "GBP";
+    if (!acc[cur]) acc[cur] = { total: 0, paid: 0 };
+    const t = invTotal(inv);
+    acc[cur].total += t;
+    if (inv.status === "Paid") acc[cur].paid += t;
+    return acc;
+  }, {});
+
+  const currencies = Object.keys(revByCur).sort();
+  const selectedCur = activeCur && revByCur[activeCur] ? activeCur : (currencies[0] ?? null);
   const overdueCount = invoices.filter(i => i.status === "Overdue").length;
   
   const recentProjects = [...projects]
@@ -124,7 +134,7 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, pName, on
         <div className="lg:col-span-2 bg-[#111116] border border-[#1e1e24] rounded-3xl p-8 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#a78bfa]/5 blur-[100px] -mr-32 -mt-32 rounded-full transition-all group-hover:bg-[#a78bfa]/10" />
           
-          <div className="flex items-center justify-between mb-8 relative z-10">
+          <div className="flex items-center justify-between mb-6 relative z-10">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#34d399]/10 flex items-center justify-center text-[#34d399]">
                 <FaArrowTrendUp size={20} />
@@ -136,31 +146,61 @@ export function Dashboard({ clients, projects, tasks, invoices, cName, pName, on
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 relative z-10">
-            <div>
-              <div className="text-[10px] text-[#71717a] font-bold uppercase tracking-widest mb-2">Total Invoiced</div>
-              <div className="text-3xl font-black text-white tracking-tight">{fmtMoney(totalInvoiced)}</div>
-              <div className="mt-2 h-1.5 w-full bg-[#1e1e24] rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#a78bfa] to-[#60a5fa] w-full" />
+          <div className="relative z-10">
+            {currencies.length > 0 ? (
+              <>
+                {/* Currency Tab Switcher */}
+                <div className="flex gap-2 mb-8 flex-wrap">
+                  {currencies.map(cur => (
+                    <button
+                      key={cur}
+                      onClick={() => setActiveCur(cur)}
+                      className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        selectedCur === cur
+                          ? "bg-[#a78bfa] text-[#0c0c0f] shadow-lg shadow-purple-500/20"
+                          : "bg-[#16161a] border border-[#1e1e24] text-[#71717a] hover:text-white hover:border-[#3f3f46]"
+                      }`}
+                    >
+                      {cur}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Active Currency Stats */}
+                {selectedCur && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                    <div>
+                      <div className="text-[10px] text-[#71717a] font-bold uppercase tracking-widest mb-2">Total Invoiced</div>
+                      <div className="text-3xl font-black text-white tracking-tight">{fmtMoney(revByCur[selectedCur].total, selectedCur)}</div>
+                      <div className="mt-3 h-1.5 w-full bg-[#1e1e24] rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-[#a78bfa] to-[#60a5fa] w-full" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-[#71717a] font-bold uppercase tracking-widest mb-2">Paid Revenue</div>
+                      <div className="text-3xl font-black text-[#34d399] tracking-tight">{fmtMoney(revByCur[selectedCur].paid, selectedCur)}</div>
+                      <div className="mt-3 h-1.5 w-full bg-[#1e1e24] rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-[#34d399] transition-all duration-500"
+                          style={{ width: revByCur[selectedCur].total > 0 ? `${(revByCur[selectedCur].paid / revByCur[selectedCur].total) * 100}%` : '0%' }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-[#71717a] font-bold uppercase tracking-widest mb-2">Outstanding</div>
+                      <div className="text-3xl font-black text-[#f59e0b] tracking-tight">{fmtMoney(revByCur[selectedCur].total - revByCur[selectedCur].paid, selectedCur)}</div>
+                      <div className="mt-3 text-[10px] text-[#52525b] font-bold uppercase tracking-widest">
+                        {overdueCount > 0 ? <span className="text-[#ef4444] flex items-center gap-1"><FaCircleExclamation /> {overdueCount} overdue</span> : "All clear"}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-10 text-[#71717a] font-bold italic">
+                No financial data recorded yet.
               </div>
-            </div>
-            <div>
-              <div className="text-[10px] text-[#71717a] font-bold uppercase tracking-widest mb-2">Paid Revenue</div>
-              <div className="text-3xl font-black text-[#34d399] tracking-tight">{fmtMoney(paidRevenue)}</div>
-              <div className="mt-2 h-1.5 w-full bg-[#1e1e24] rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#34d399]" 
-                  style={{ width: totalInvoiced > 0 ? `${(paidRevenue / totalInvoiced) * 100}%` : '0%' }} 
-                />
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] text-[#71717a] font-bold uppercase tracking-widest mb-2">Overdue</div>
-              <div className="text-3xl font-black text-[#ef4444] tracking-tight">{overdueCount}</div>
-              <div className="text-[10px] text-[#ef4444] font-bold mt-2 flex items-center gap-1">
-                <FaCircleExclamation /> Needs attention
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

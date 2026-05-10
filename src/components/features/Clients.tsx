@@ -13,8 +13,10 @@ import {
   FaPenToSquare, 
   FaTrashCan, 
   FaBriefcase, 
-  FaUser 
+  FaUser,
+  FaFileInvoice
 } from "react-icons/fa6";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 
 interface ClientsProps {
   clients: Client[];
@@ -22,6 +24,7 @@ interface ClientsProps {
   onAdd: () => void;
   onEdit: (client: Client) => void;
   onDel: (id: string) => void;
+  onInvoice?: (id: string) => void;
 }
 
 export function Clients({
@@ -30,8 +33,10 @@ export function Clients({
   onAdd,
   onEdit,
   onDel,
+  onInvoice,
 }: ClientsProps) {
   const [query, setQuery] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = clients.filter((c) =>
     `${c.name} ${c.email} ${c.company}`
@@ -161,16 +166,18 @@ export function Clients({
                     <FaPenToSquare size={12} />
                     Edit
                   </button>
+                  {onInvoice && (
+                    <button
+                      className="flex-1 bg-[#a78bfa]/10 hover:bg-[#a78bfa]/20 border border-[#a78bfa]/20 text-[#a78bfa] text-[10px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all flex items-center justify-center gap-2"
+                      onClick={() => onInvoice(client.id)}
+                    >
+                      <FaFileInvoice size={12} />
+                      Invoice
+                    </button>
+                  )}
                   <button
                     className="flex-1 bg-[#ef4444]/5 hover:bg-[#ef4444]/10 border border-[#ef4444]/10 hover:border-[#ef4444]/30 text-[#ef4444] text-[10px] font-black uppercase tracking-widest py-2.5 rounded-xl transition-all flex items-center justify-center gap-2"
-                    onClick={() => {
-                      if (
-                        confirm(
-                          "Remove client? This will not delete their projects.",
-                        )
-                      )
-                        onDel(client.id);
-                    }}
+                    onClick={() => setDeleteId(client.id)}
                   >
                     <FaTrashCan size={12} />
                     Delete
@@ -181,6 +188,18 @@ export function Clients({
           })}
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId) onDel(deleteId);
+          setDeleteId(null);
+        }}
+        title="Remove Client"
+        message="Are you sure you want to remove this client? This will not delete their projects, but they will be unlinked."
+        confirmText="Remove"
+      />
     </div>
   );
 }

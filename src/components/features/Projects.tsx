@@ -20,7 +20,8 @@ interface ProjectsProps {
   onStatus: (p: Project, s: any) => void;
 }
 
-import { FaList, FaTableCellsLarge, FaPlus, FaMagnifyingGlass } from "react-icons/fa6";
+import { FaList, FaTableCellsLarge, FaPlus, FaMagnifyingGlass, FaCheck } from "react-icons/fa6";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 
 export function Projects({ 
   projects, 
@@ -36,6 +37,7 @@ export function Projects({
 }: ProjectsProps) {
   const [filter, setFilter] = useState("All");
   const [query, setQuery] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = projects
     .filter(p => filter === "All" || p.status === filter)
@@ -110,9 +112,15 @@ export function Projects({
 
               return (
                 <div key={p.id} className="bg-[#16161a] border border-[#1e1e24] rounded-2xl p-5 hover:border-[#a78bfa]/30 transition-all group relative overflow-hidden">
-                  <div className="flex justify-between items-start mb-4">
-                    <Badge text={p.status} />
-                    <div className="text-[10px] text-[#52525b] font-mono">{p.id.slice(0, 4)}</div>
+                  <div className="flex justify-between items-center mb-4">
+                    <div className="text-[10px] text-[#52525b] font-mono tracking-widest uppercase">{p.id.slice(0, 4)}</div>
+                    <select 
+                      className="bg-[#0c0c0f] border border-[#27272a] rounded-lg px-2 py-1 text-[9px] font-black uppercase tracking-widest text-[#a1a1aa] outline-none cursor-pointer focus:border-[#a78bfa]/50 transition-all hover:bg-[#1e1e24] hover:text-white"
+                      value={p.status}
+                      onChange={(e) => onStatus(p, e.target.value)}
+                    >
+                      {PROJECT_STATUS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
                   
                   <h4 className="font-bold text-lg text-white mb-1 group-hover:text-[#a78bfa] transition-colors">{p.name}</h4>
@@ -141,14 +149,14 @@ export function Projects({
 
                   <div className="flex gap-2 pt-4 border-t border-[#1e1e24]">
                     <button 
-                      className="flex-1 bg-[#27272a] hover:bg-[#3f3f46] text-white text-[11px] font-bold py-2 rounded-lg"
+                      className="flex-1 bg-[#27272a] hover:bg-[#3f3f46] text-white text-[11px] font-bold py-2 rounded-lg flex items-center justify-center gap-2"
                       onClick={() => onEdit(p)}
                     >
                       Edit
                     </button>
                     <button 
                       className="flex-1 border border-[#3f3f46] hover:border-[#ef4444] text-[#ef4444] text-[11px] font-bold py-2 rounded-lg transition-all"
-                      onClick={() => { if (confirm("Delete project?")) onDel(p.id); }}
+                      onClick={() => setDeleteId(p.id)}
                     >
                       Delete
                     </button>
@@ -169,13 +177,25 @@ export function Projects({
               <div className="text-[11px] font-semibold text-[#a78bfa]">{fmtMoney(p.budget, p.currency)}</div>
               <div className="flex gap-2 mt-4 pt-3 border-t border-[#1e1e24]">
                 <button className="text-[#71717a] hover:text-white text-sm" onClick={() => onEdit(p)}>✎</button>
-                <button className="text-[#71717a] hover:text-[#ef4444] text-sm" onClick={() => { if (confirm("Delete?")) onDel(p.id); }}>✕</button>
+                <button className="text-[#71717a] hover:text-[#ef4444] text-sm" onClick={() => setDeleteId(p.id)}>✕</button>
               </div>
             </div>
           )} 
           onMove={onStatus} 
         />
       )}
+
+      <ConfirmationModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId) onDel(deleteId);
+          setDeleteId(null);
+        }}
+        title="Delete Project"
+        message="Are you sure you want to delete this project? All associated data will be removed from the view."
+        confirmText="Delete Project"
+      />
     </div>
   );
 }

@@ -20,7 +20,7 @@ interface InvPreviewProps {
 }
 
 export function InvoicePreview({ invoice, cName, pName }: InvPreviewProps) {
-  const sub = (invoice.items || []).reduce(
+  const sub = Number(invoice.amount) || (invoice.items || []).reduce(
     (s, i) => s + (Number(i.qty) || 0) * (Number(i.rate) || 0),
     0,
   );
@@ -141,46 +141,48 @@ export function InvoicePreview({ invoice, cName, pName }: InvPreviewProps) {
             </div>
 
             {/* Line Items */}
-            <div className="mb-16">
-              {/* Desktop Header */}
-              <div className="hidden md:grid grid-cols-12 gap-4 text-[10px] font-black text-[#52525b] uppercase tracking-widest mb-4 px-4">
-                <div className="col-span-6">Description</div>
-                <div className="col-span-2 text-center">Qty</div>
-                <div className="col-span-2 text-right">Rate</div>
-                <div className="col-span-2 text-right">Amount</div>
-              </div>
-              
-              <div className="space-y-2 md:space-y-1">
-                {(invoice.items || []).map((item, i) => (
-                  <div key={i} className="group">
-                    {/* Desktop View */}
-                    <div className="hidden md:grid grid-cols-12 gap-4 items-center bg-[#16161a]/30 border border-[#1e1e24]/30 rounded-xl p-4">
-                      <div className="col-span-6 text-sm font-bold text-white">{item.description}</div>
-                      <div className="col-span-2 text-center text-xs font-bold text-[#71717a]">{item.qty}</div>
-                      <div className="col-span-2 text-right text-xs font-bold text-[#71717a]">{fmtMoney(item.rate, cur)}</div>
-                      <div className="col-span-2 text-right text-sm font-black text-white">
-                        {fmtMoney((Number(item.qty) || 0) * (Number(item.rate) || 0), cur)}
-                      </div>
-                    </div>
-                    
-                    {/* Mobile View */}
-                    <div className="md:hidden bg-[#16161a]/30 border border-[#1e1e24]/30 rounded-2xl p-5 space-y-3">
-                      <div className="text-sm font-bold text-white">{item.description}</div>
-                      <div className="flex justify-between items-center pt-2 border-t border-[#1e1e24]/50">
-                        <div className="text-[10px] font-black text-[#52525b] uppercase tracking-widest">Details</div>
-                        <div className="text-xs font-bold text-[#71717a]">{item.qty} × {fmtMoney(item.rate, cur)}</div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <div className="text-[10px] font-black text-[#52525b] uppercase tracking-widest">Subtotal</div>
-                        <div className="text-sm font-black text-[#a78bfa]">
+            {invoice.items && invoice.items.length > 0 && invoice.items.some(i => i.description) && (
+              <div className="mb-16">
+                {/* Desktop Header */}
+                <div className="hidden md:grid grid-cols-12 gap-4 text-[10px] font-black text-[#52525b] uppercase tracking-widest mb-4 px-4">
+                  <div className="col-span-6">Description</div>
+                  <div className="col-span-2 text-center">Qty</div>
+                  <div className="col-span-2 text-right">Rate</div>
+                  <div className="col-span-2 text-right">Amount</div>
+                </div>
+                
+                <div className="space-y-2 md:space-y-1">
+                  {invoice.items.map((item, i) => (
+                    <div key={i} className="group">
+                      {/* Desktop View */}
+                      <div className="hidden md:grid grid-cols-12 gap-4 items-center bg-[#16161a]/30 border border-[#1e1e24]/30 rounded-xl p-4">
+                        <div className="col-span-6 text-sm font-bold text-white">{item.description}</div>
+                        <div className="col-span-2 text-center text-xs font-bold text-[#71717a]">{item.qty}</div>
+                        <div className="col-span-2 text-right text-xs font-bold text-[#71717a]">{fmtMoney(item.rate, cur)}</div>
+                        <div className="col-span-2 text-right text-sm font-black text-white">
                           {fmtMoney((Number(item.qty) || 0) * (Number(item.rate) || 0), cur)}
                         </div>
                       </div>
+                      
+                      {/* Mobile View */}
+                      <div className="md:hidden bg-[#16161a]/30 border border-[#1e1e24]/30 rounded-2xl p-5 space-y-3">
+                        <div className="text-sm font-bold text-white">{item.description}</div>
+                        <div className="flex justify-between items-center pt-2 border-t border-[#1e1e24]/50">
+                          <div className="text-[10px] font-black text-[#52525b] uppercase tracking-widest">Details</div>
+                          <div className="text-xs font-bold text-[#71717a]">{item.qty} × {fmtMoney(item.rate, cur)}</div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-[10px] font-black text-[#52525b] uppercase tracking-widest">Subtotal</div>
+                          <div className="text-sm font-black text-[#a78bfa]">
+                            {fmtMoney((Number(item.qty) || 0) * (Number(item.rate) || 0), cur)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Financial Summary */}
             <div className="flex flex-col md:flex-row justify-between items-end gap-12 pt-8 border-t border-[#1e1e24]">

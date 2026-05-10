@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useStudioApi } from "@/hooks/useStudioApi";
 import { Invoice, Client, Project } from "@/lib/types";
 import { Invoices } from "@/components/features/Invoices";
@@ -10,7 +11,7 @@ import { InvoicesSkeleton } from "@/components/ui/Skeleton";
 import { InvoiceForm } from "@/components/features/Forms";
 import { generateInvoicePDF } from "@/lib/invoiceUtils";
 
-export default function InvoicesPage() {
+function InvoicesPageInner() {
   const { data: invoices, save: apiSave, remove: apiRemove, loading: invoicesLoading } = useStudioApi<Invoice>("invoices");
   const { data: clients, loading: clientsLoading } = useStudioApi<Client>("clients");
   const { data: projects, loading: projectsLoading } = useStudioApi<Project>("projects");
@@ -19,7 +20,16 @@ export default function InvoicesPage() {
   const [editItem, setEditItem] = useState<Invoice | null>(null);
   const [invPreview, setInvPreview] = useState<Invoice | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const searchParams = useSearchParams();
   const [saving, setSaving] = useState(false);
+  
+  useEffect(() => {
+    const cid = searchParams.get("clientId");
+    if (cid && clients.length > 0) {
+      setEditItem({ clientId: cid } as any);
+      setModal(true);
+    }
+  }, [searchParams, clients]);
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -104,5 +114,13 @@ export default function InvoicesPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={<InvoicesSkeleton />}>
+      <InvoicesPageInner />
+    </Suspense>
   );
 }

@@ -6,6 +6,7 @@ import { TASK_STATUS, STATUS_COLORS, PRIORITIES } from "@/lib/constants";
 import { Badge } from "@/components/ui/Badge";
 import { FaList, FaTableCellsLarge, FaPlus, FaCheck, FaPenToSquare, FaTrashCan } from "react-icons/fa6";
 import { Kanban } from "@/components/ui/Kanban";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 
 interface TasksProps {
   tasks: Task[];
@@ -33,6 +34,7 @@ export function Tasks({
   onMove 
 }: TasksProps) {
   const [filter, setFilter] = useState("All");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   
   const priMap: Record<string, number> = { Urgent: 0, High: 1, Medium: 2, Low: 3 };
   const sorted = [...tasks].sort((a, b) => (priMap[a.priority] ?? 4) - (priMap[b.priority] ?? 4));
@@ -125,7 +127,7 @@ export function Tasks({
                     <button className="p-2 text-[#71717a] hover:text-white transition-colors" onClick={() => onEdit(t)}>
                       <FaPenToSquare size={14} />
                     </button>
-                    <button className="p-2 text-[#71717a] hover:text-[#ef4444] transition-colors" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>
+                    <button className="p-2 text-[#71717a] hover:text-[#ef4444] transition-colors" onClick={() => setDeleteId(t.id)}>
                       <FaTrashCan size={14} />
                     </button>
                   </div>
@@ -150,7 +152,7 @@ export function Tasks({
                 <button className="text-[#71717a] hover:text-white text-sm" onClick={() => onEdit(t)}>
                   <FaPenToSquare />
                 </button>
-                <button className="text-[#71717a] hover:text-[#ef4444] text-sm" onClick={() => { if (confirm("Delete?")) onDel(t.id); }}>
+                <button className="text-[#71717a] hover:text-[#ef4444] text-sm" onClick={() => setDeleteId(t.id)}>
                   <FaTrashCan />
                 </button>
               </div>
@@ -159,6 +161,18 @@ export function Tasks({
           onMove={onMove} 
         />
       )}
+
+      <ConfirmationModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId) onDel(deleteId);
+          setDeleteId(null);
+        }}
+        title="Delete Task"
+        message="Are you sure you want to permanently delete this task? This action cannot be undone."
+        confirmText="Delete Task"
+      />
     </div>
   );
 }

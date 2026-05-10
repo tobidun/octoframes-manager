@@ -37,3 +37,41 @@ export const SaveButton = ({ onClick, disabled, children, loading }: any) => (
     {loading ? "Processing..." : children}
   </button>
 );
+
+// Formats value with commas while storing raw numeric string
+export const PriceInput = ({
+  value,
+  onChange,
+  placeholder = "0.00",
+  className = "",
+  ...props
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> & {
+  value: string | number;
+  onChange: (raw: string) => void;
+}) => {
+  const formatWithCommas = (raw: string) => {
+    const digits = raw.replace(/[^0-9.]/g, "");
+    const parts = digits.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.length > 1 ? `${parts[0]}.${parts[1]}` : parts[0];
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/,/g, "");
+    onChange(raw);
+  };
+
+  const displayed = formatWithCommas(String(value ?? ""));
+
+  return (
+    <input
+      {...props}
+      type="text"
+      inputMode="decimal"
+      value={displayed}
+      placeholder={placeholder}
+      onChange={handleChange}
+      className={`w-full bg-[#111116] border border-[#1e1e24] rounded-xl px-5 py-3.5 text-sm text-white outline-none focus:border-[#a78bfa]/50 focus:ring-4 focus:ring-[#a78bfa]/5 transition-all placeholder:text-[#3f3f46] ${className}`}
+    />
+  );
+};

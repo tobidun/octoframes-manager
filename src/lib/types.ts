@@ -58,6 +58,7 @@ export interface Invoice {
   issueDate: string;
   dueDate?: string;
   taxRate: string | number;
+  amount: string | number;
   notes?: string;
   items: InvoiceItem[];
   created: string;
